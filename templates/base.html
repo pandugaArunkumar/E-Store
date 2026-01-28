@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Online Shop</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg custom-navbar">
+  <div class="container">
+
+    <!-- LOGO -->
+    <a class="navbar-brand" href="/">Estore.</a>
+
+    <!-- TOGGLER -->
+    <button class="navbar-toggler" type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- MENU -->
+    <div class="collapse navbar-collapse" id="navMenu">
+
+      <!-- CENTER LINKS -->
+      <ul class="navbar-nav mx-auto">
+        <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="/products">Shop</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Blog</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Contact</a></li>
+      </ul>
+
+      <!-- RIGHT SIDE -->
+      <div class="d-flex align-items-center gap-3">
+
+        <!-- SEARCH -->
+        <form class="search-box">
+          <input type="text" placeholder="Search products">
+          <button type="submit">🔍</button>
+        </form>
+
+        {% if current_user.is_authenticated %}
+        <!-- PROFILE DROPDOWN -->
+        <div class="dropdown">
+          <a class="profile-btn dropdown-toggle"
+             href="#"
+             role="button"
+             data-bs-toggle="dropdown"
+             aria-expanded="false">
+            👤 {{ current_user.name }}
+          </a>
+
+          <ul class="dropdown-menu dropdown-menu-end profile-dropdown">
+            <li>
+              <a class="dropdown-item" href="{{ url_for('profile') }}">
+                👤 My Profile
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ url_for('orders') }}">
+                📦 My Orders
+              </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <a class="dropdown-item logout-item" href="{{ url_for('logout') }}">
+                🚪 Logout
+              </a>
+            </li>
+          </ul>
+        </div>
+        {% else %}
+        <a href="/login" class="btn btn-outline-light btn-sm">Login</a>
+        <a href="/register" class="btn btn-primary btn-sm">Register</a>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+</nav>
+
+{% block content %}{% endblock %}
+
+<!-- JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<!-- NAVBAR SCROLL EFFECT -->
+<script>
+const navbar = document.querySelector(".custom-navbar");
+
+window.addEventListener("scroll", () => {
+    if (window.scrollY > 60) {
+        navbar.classList.add("nav-scrolled");
+    } else {
+        navbar.classList.remove("nav-scrolled");
+    }
+});
+</script>
+
+
+</body>
+</html>

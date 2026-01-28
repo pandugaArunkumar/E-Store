@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container py-5">
+    <h2 class="fw-bold mb-4">Edit Product</h2>
+
+    <form method="POST">
+
+        <label>Name</label>
+        <input class="form-control mb-3"
+               name="name"
+               value="{{ product.name }}">
+
+        <label>Price</label>
+        <input class="form-control mb-3"
+               name="price"
+               value="{{ product.price }}">
+
+        <label>Category</label>
+        <input class="form-control mb-3"
+               name="category"
+               value="{{ product.category }}">
+
+        <label>Description</label>
+        <textarea class="form-control mb-3"
+                  name="description">{{ product.description }}</textarea>
+
+        <label>Image filename</label>
+        <input class="form-control mb-3"
+               name="image"
+               value="{{ product.image }}">
+
+        <button class="btn btn-primary">Update Product</button>
+    </form>
+</div>
+
+{% endblock %}

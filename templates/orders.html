@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="orders-wrapper">
+
+    <div class="orders-header">
+        <h2>Your Orders</h2>
+        <p>Track, manage and reorder your purchases</p>
+    </div>
+
+    {% if orders %}
+        {% for order in orders %}
+        <div class="order-card">
+
+            <!-- ORDER HEADER -->
+            <div class="order-header">
+                <div>
+                    <span>Order Placed</span>
+                    <strong>{{ order.created_at.strftime('%d %b %Y') }}</strong>
+                </div>
+                <div>
+                    <span>Order ID</span>
+                    <strong>#{{ order.id }}</strong>
+                </div>
+                <div>
+                    <span>Total</span>
+                    <strong class="price">₹{{ "%.2f"|format(order.total_amount) }}</strong>
+                </div>
+                <span class="order-status">{{ order.status }}</span>
+            </div>
+
+            <!-- ORDER PROGRESS -->
+            {% set steps = ['Placed', 'Packed', 'Shipped', 'Delivered'] %}
+            <div class="order-progress">
+                {% for step in steps %}
+                    <div class="progress-step
+                        {% if steps.index(step) <= steps.index(order.status) %}
+                            completed
+                        {% endif %}
+                    ">
+                        {{ step }}
+                    </div>
+                    {% if not loop.last %}
+                        <div class="progress-line"></div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <!-- ORDER ITEMS -->
+            <div class="order-items">
+                {% for item in order.items %}
+                <div class="order-item">
+
+                    <img src="{{ url_for('static', filename=item.product.image) }}"
+                         alt="{{ item.product.name }}"
+                         onerror="this.src='{{ url_for('static', filename='images/default.png') }}'">
+
+                    <div class="item-details">
+                        <h5>{{ item.product.name }}</h5>
+                        <p>₹{{ item.price }} × {{ item.quantity }}</p>
+                        <span>Subtotal: ₹{{ item.price * item.quantity }}</span>
+                    </div>
+
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- ACTION BUTTONS -->
+            <div class="order-footer">
+                <a href="{{ url_for('track_order', order_id=order.id) }}"
+                   class="btn-outline">
+                   Track Package
+                </a>
+
+                <a href="{{ url_for('buy_again', order_id=order.id) }}"
+                   class="btn-primary">
+                   Buy Again
+                </a>
+            </div>
+
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-orders">
+            <h4>No orders yet 😕</h4>
+            <a href="/products" class="btn-primary">Start Shopping</a>
+        </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

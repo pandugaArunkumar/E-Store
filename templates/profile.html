@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<div class="account-page">
+
+    <!-- HEADER -->
+    <div class="account-header">
+        <h2>My Account</h2>
+        <p>Manage your profile, orders, and saved addresses</p>
+    </div>
+
+    <!-- GRID -->
+    <div class="account-grid">
+
+        <!-- ACCOUNT INFO -->
+        <div class="account-card">
+            <div class="card-title">
+                <i class="fa-solid fa-user"></i>
+                <h4>Account Information</h4>
+            </div>
+
+            <div class="info-row">
+                <span>Name</span>
+                <strong>{{ current_user.name }}</strong>
+            </div>
+
+            <div class="info-row">
+                <span>Email</span>
+                <strong>{{ current_user.email }}</strong>
+            </div>
+
+            <div class="card-actions">
+                <a href="#" class="btn-primary">
+                    <i class="fa-solid fa-pen"></i> Edit Profile
+                </a>
+                <a href="{{ url_for('orders') }}" class="btn-outline">
+                    <i class="fa-solid fa-box"></i> View Orders
+                </a>
+            </div>
+        </div>
+
+        <!-- ORDERS QUICK CARD -->
+        <div class="account-card highlight">
+            <div class="card-title">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <h4>Your Orders</h4>
+            </div>
+
+            <p class="card-desc">
+                Track, return, or buy things again
+            </p>
+
+            <div class="card-actions">
+                <a href="{{ url_for('orders') }}" class="btn-primary">
+                    Go to Orders
+                </a>
+            </div>
+        </div>
+
+        <!-- ADDRESS -->
+        <div class="account-card full-width">
+            <div class="card-title">
+                <i class="fa-solid fa-location-dot"></i>
+                <h4>Saved Address</h4>
+            </div>
+
+            {% if current_user.address %}
+                <div class="address-box">
+                    {{ current_user.address }}
+                </div>
+            {% else %}
+                <p class="muted-text">No address added yet.</p>
+            {% endif %}
+
+            <div class="card-actions">
+                <a href="#" class="btn-outline">
+                    <i class="fa-solid fa-plus"></i> Add / Edit Address
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

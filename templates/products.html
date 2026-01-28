@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container py-5">
+
+    <!-- PAGE TITLE -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">Products</h2>
+        <span class="text-muted">{{ products.total }} items</span>
+    </div>
+
+    <!-- 🔍 SEARCH + FILTER FORM -->
+    <form method="GET" class="filter-bar mb-5">
+
+        <input type="text" name="search"
+               value="{{ request.args.get('search','') }}"
+               placeholder="🔍 Search products...">
+
+        <input type="hidden" name="season" value="Winter">
+
+        <input type="number" name="min_price"
+               value="{{ request.args.get('min_price','') }}"
+               placeholder="Min ₹">
+
+        <input type="number" name="max_price"
+               value="{{ request.args.get('max_price','') }}"
+               placeholder="Max ₹">
+
+        <select name="sort">
+            <option value="">Sort By</option>
+            <option value="price_low" {% if request.args.get('sort')=='price_low' %}selected{% endif %}>
+                Price ↑
+            </option>
+            <option value="price_high" {% if request.args.get('sort')=='price_high' %}selected{% endif %}>
+                Price ↓
+            </option>
+            <option value="newest" {% if request.args.get('sort')=='newest' %}selected{% endif %}>
+                Newest
+            </option>
+        </select>
+
+        <button class="btn-filter">Filter</button>
+    </form>
+
+    <!-- 🛍️ PRODUCTS GRID -->
+    <div class="row g-4">
+        {% for product in products.items %}
+        <div class="col-lg-3 col-md-4 col-sm-6">
+
+            <div class="product-card-elite">
+
+                <div class="product-img">
+                    <img src="{{ url_for('static', filename='images/' ~ product.image) }}"
+                         alt="{{ product.name }}">
+
+                    <a href="{{ url_for('product_detail', id=product.id) }}" class="quick-view-btn">
+                        👁 Quick View
+                    </a>
+                </div>
+
+                <div class="product-info">
+                    <h6>{{ product.name }}</h6>
+
+                    <div class="price-row">
+                        <span class="price">₹{{ product.price }}</span>
+                        <span class="rating">
+                            {% if product.reviews|length > 0 %}
+                                ⭐ {{ "%.1f"|format(product.reviews|map(attribute='rating')|sum / product.reviews|length) }}
+                            {% else %}
+                                <span class="text-muted">No ratings</span>
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    {% if current_user.is_authenticated %}
+                        <a href="{{ url_for('buy_now', product_id=product.id) }}">
+                            <button class="btn-buy">Buy Now</button>
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('login') }}">
+                            <button class="btn-buy">Buy Now</button>
+                        </a>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+        {% else %}
+            <p class="text-center text-muted mt-5">No products found 😔</p>
+        {% endfor %}
+    </div>
+
+    <!-- 🔢 PAGINATION -->
+    {% if products.pages > 1 %}
+    <nav class="mt-5">
+        <ul class="pagination justify-content-center">
+
+            {% if products.has_prev %}
+            <li class="page-item">
+                <a class="page-link"
+                   href="{{ url_for('products', page=products.prev_num,
+                       search=request.args.get('search'),
+                       min_price=request.args.get('min_price'),
+                       max_price=request.args.get('max_price'),
+                       sort=request.args.get('sort'),
+                       season=request.args.get('season')) }}">
+                    ← Prev
+                </a>
+            </li>
+            {% endif %}
+
+            {% for page_num in products.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                {% if page_num %}
+                <li class="page-item {% if page_num == products.page %}active{% endif %}">
+                    <a class="page-link"
+                       href="{{ url_for('products', page=page_num,
+                           search=request.args.get('search'),
+                           min_price=request.args.get('min_price'),
+                           max_price=request.args.get('max_price'),
+                           sort=request.args.get('sort'),
+                           season=request.args.get('season')) }}">
+                        {{ page_num }}
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><span class="page-link">…</span></li>
+                {% endif %}
+            {% endfor %}
+
+            {% if products.has_next %}
+            <li class="page-item">
+                <a class="page-link"
+                   href="{{ url_for('products', page=products.next_num,
+                       search=request.args.get('search'),
+                       min_price=request.args.get('min_price'),
+                       max_price=request.args.get('max_price'),
+                       sort=request.args.get('sort'),
+                       season=request.args.get('season')) }}">
+                    Next →
+                </a>
+            </li>
+            {% endif %}
+
+        </ul>
+    </nav>
+    {% endif %}
+
+</div>
+
+{% endblock %}

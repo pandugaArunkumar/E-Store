@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container py-5">
+  <div class="row g-5 align-items-start">
+
+    <!-- LEFT : IMAGE GALLERY -->
+    <div class="col-lg-6">
+
+      {% set images = product.image.split(',') %}
+
+      <div class="product-image-card shadow mb-3">
+        <img
+          id="mainImage"
+          src="{{ url_for('static', filename='images/' + images[0]) }}"
+          alt="{{ product.name }}"
+          class="img-fluid zoom-image rounded-4"
+        >
+      </div>
+
+      <!-- THUMBNAILS -->
+      <div class="d-flex gap-2">
+        {% for img in images %}
+          <img
+            src="{{ url_for('static', filename='images/' + img) }}"
+            class="thumb-img"
+            onclick="document.getElementById('mainImage').src=this.src"
+          >
+        {% endfor %}
+      </div>
+
+    </div>
+
+    <!-- RIGHT : DETAILS -->
+    <div class="col-lg-6">
+
+      <h2 class="fw-bold mb-2">{{ product.name }}</h2>
+
+      <div class="d-flex align-items-center gap-3 mb-3">
+        <h3 class="text-success fw-bold mb-0">₹{{ product.price }}</h3>
+        <span class="badge bg-success-subtle text-success">In Stock</span>
+      </div>
+
+      <div class="mb-3 rating">
+  {% if reviews|length > 0 %}
+    ⭐ {{ "%.1f"|format(reviews | map(attribute='rating') | sum / reviews|length) }} / 5
+    <span class="text-muted">({{ reviews|length }} reviews)</span>
+  {% else %}
+    <span class="text-muted">No ratings yet</span>
+  {% endif %}
+</div>
+
+
+      <p class="text-muted mb-4">
+        {{ product.description }}
+      </p>
+
+      <!-- PRODUCT SPECS -->
+      <h5 class="fw-bold mb-3">Product Specifications</h5>
+      <table class="table table-bordered mb-4">
+        <tr>
+          <th>Category</th>
+          <td>{{ product.category }}</td>
+        </tr>
+        <tr>
+          <th>Material</th>
+          <td>Premium Fabric</td>
+        </tr>
+        <tr>
+          <th>Fit</th>
+          <td>Regular Fit</td>
+        </tr>
+        <tr>
+          <th>Care</th>
+          <td>Machine Wash</td>
+        </tr>
+      </table>
+
+      <!-- BUTTONS -->
+      <div class="d-flex gap-3 mb-4">
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('add_to_cart', product_id=product.id) }}"
+             class="btn btn-primary btn-lg px-4">
+            🛒 Add to Cart
+          </a>
+          <a href="{{ url_for('buy_now', product_id=product.id) }}"
+             class="btn btn-success btn-lg px-4">
+            ⚡ Buy Now
+          </a>
+        {% else %}
+          <a href="{{ url_for('login') }}"
+             class="btn btn-primary btn-lg px-4">
+            Login to Buy
+          </a>
+        {% endif %}
+      </div>
+
+      <div class="delivery-box">
+        <p>🚚 Free Delivery within 3–5 days</p>
+        <p>🔄 7 Days Easy Return</p>
+        <p>🔒 Secure Payment</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- YOU MAY ALSO LIKE (CAROUSEL) -->
+  {% if related_products %}
+  <hr class="my-5">
+
+  <h4 class="fw-bold mb-4">You may also like</h4>
+
+  <div id="relatedCarousel" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-inner">
+
+      {% for group in related_products|batch(4, fill_with=None) %}
+      <div class="carousel-item {% if loop.first %}active{% endif %}">
+        <div class="row g-4">
+
+          {% for p in group %}
+          {% if p %}
+          <div class="col-md-3">
+            <div class="card h-100 shadow-sm">
+              <img
+                src="{{ url_for('static', filename='images/' + p.image) }}"
+                class="card-img-top"
+                style="height:220px; object-fit:cover;"
+              >
+              <div class="card-body text-center">
+                <h6 class="fw-bold">{{ p.name }}</h6>
+                <p class="text-success fw-semibold">₹{{ p.price }}</p>
+                <a href="{{ url_for('product_detail', id=p.id) }}"
+                   class="btn btn-outline-primary btn-sm w-100">
+                  View
+                </a>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+          {% endfor %}
+
+        </div>
+      </div>
+      {% endfor %}
+
+    </div>
+
+    <!-- CONTROLS -->
+    <button class="carousel-control-prev" type="button"
+            data-bs-target="#relatedCarousel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon"></span>
+    </button>
+
+    <button class="carousel-control-next" type="button"
+            data-bs-target="#relatedCarousel" data-bs-slide="next">
+      <span class="carousel-control-next-icon"></span>
+    </button>
+  </div>
+  {% endif %}
+
+  <!-- REVIEWS -->
+  <hr class="my-5">
+
+  <h4 class="fw-bold mb-4">Customer Reviews</h4>
+
+  {% for r in reviews %}
+    <div class="border rounded p-3 mb-3 shadow-sm">
+      <div class="d-flex justify-content-between">
+        <strong>{{ r.user.name }}</strong>
+        <span>⭐ {{ r.rating }}/5</span>
+      </div>
+      <p class="text-muted mt-2">{{ r.comment }}</p>
+    </div>
+  {% else %}
+    <p class="text-muted">No reviews yet. Be the first to review!</p>
+  {% endfor %}
+
+  <!----add review after login-->
+  
+
+  {% if current_user.is_authenticated %}
+
+<hr class="my-4">
+
+<h5 class="fw-bold mb-3">Write a Review</h5>
+
+<form method="POST" action="{{ url_for('add_review', product_id=product.id) }}"
+      class="border rounded p-4 shadow-sm bg-light">
+
+  <!-- ⭐ RATING -->
+  <div class="mb-3">
+    <label class="form-label fw-semibold">Rating</label>
+    <select name="rating" class="form-select" required>
+      <option value="">Select rating</option>
+      <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+      <option value="4">⭐⭐⭐⭐ (4)</option>
+      <option value="3">⭐⭐⭐ (3)</option>
+      <option value="2">⭐⭐ (2)</option>
+      <option value="1">⭐ (1)</option>
+    </select>
+  </div>
+
+  <!-- ✍ COMMENT -->
+  <div class="mb-3">
+    <label class="form-label fw-semibold">Your Review</label>
+    <textarea name="comment"
+              class="form-control"
+              rows="3"
+              placeholder="Share your experience..."
+              required></textarea>
+  </div>
+
+  <button type="submit" class="btn btn-success px-4">
+    Submit Review
+  </button>
+
+</form>
+
+{% else %}
+<p class="text-muted">
+  <a href="{{ url_for('login') }}">Login</a> to write a review.
+</p>
+{% endif %}
+
+</div>
+
+{% endblock %}
